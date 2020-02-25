@@ -6,69 +6,48 @@ const ImgCapture = () => {
     let screenshotFormat: string = "image/jpeg";
 
     let videoPnl: HTMLVideoElement | null;
-    let _hasUserMedia: boolean = false;
     let ctx: CanvasRenderingContext2D | null;
     const [previewPicture, setPreviewPicture] = useState(photo);
 
-    // useEffect(() => {
-
-    //     videoPnl = document.querySelector('video');
-    //     var md: MediaDevices = navigator.mediaDevices;
-    //     var stream = md.getUserMedia({ video: true });
-    //     md.getUserMedia({ video: true })
-    //         .then((stream) => {
-    //             if (videoPnl)
-    //                 videoPnl.srcObject = stream;
-    //             _hasUserMedia = true;
-    //         }, (err) => {
-    //             console.log(err);
-    //         });
-    // }
-    // , []);
-
-    const getCanvas = () => {
-
-        if (videoPnl) {
-            var canvas: HTMLCanvasElement = document.createElement("canvas");
-            canvas.height = videoPnl.clientHeight;
-            canvas.width = videoPnl.clientWidth;
-
-            ctx = canvas.getContext("2d");
-            if (ctx) {
-                ctx.drawImage(videoPnl, 0, 0, canvas.width, canvas.height);
-            }
-            return canvas;
-        }
-    }
+    const constraints = {
+        video: true,
+    };
 
     const cameraOn = () => {
         videoPnl = document.querySelector('video');
-        var md: MediaDevices = navigator.mediaDevices;
-        var stream = md.getUserMedia({ video: true });
-        md.getUserMedia({ video: true })
+        navigator.mediaDevices.getUserMedia(constraints)
             .then((stream) => {
-                if (videoPnl)
+                if (videoPnl) {
                     videoPnl.srcObject = stream;
-                _hasUserMedia = true;
-            }, (err) => {
-                console.log(err);
+                }
             });
     }
 
     const takePhoto = () => {
-        var canvas: HTMLCanvasElement | undefined = getCanvas();
+        videoPnl = document.querySelector('video');
+        let canvas = document.querySelector('canvas');
         if (canvas) {
-            photo = canvas.toDataURL(screenshotFormat);
+            const context = canvas.getContext('2d');
+            if (context && videoPnl)
+                context.drawImage(videoPnl, 0, 0, canvas.width, canvas.height);
         }
-        setPreviewPicture(photo)
+    }
+
+    const saveImage = () => {
+        let canvas = document.querySelector('canvas');
+        if (canvas) {
+            canvas.toBlob(function (blob) {
+            }, 'image/wbmp');
+        }
     }
 
     return (
         <div>
-            <video src="src" width="width" height="height" autoPlay></video>
+            <video id="player" width="320" height="240" autoPlay></video>
             <img src={previewPicture} alt="" width="width" height="height" />
+            <canvas id="canvas" width="320" height="240"></canvas>
             <hr />
-            <button type="button" onClick={cameraOn}>Camera</button>
+            <button type="button" onClick={cameraOn}>Camera On</button>
             <button type="button" onClick={takePhoto}>Take Photo</button>
             <hr />
         </div>
